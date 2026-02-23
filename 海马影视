@@ -64,6 +64,17 @@
 			"api": "http://sspa8.top:99/php/%E4%B8%93%E4%BA%AB.php"
 		},
         {
+            "key": "wv_3q",
+            "name": "🦄3Q影视｜追剧",
+            "api": "csp_WvSpider",
+            "jar": "https://bitbucket.org/guot55/jar2/raw/b82dcb2d195d66dcb3b83fa3f078d28271bfd412/WvSpider.jar",
+            "type": "3",
+            "ext": "https://bitbucket.org/guot55/bhmb/raw/main/TVBoxOSC/tvbox/js/3Q.js",
+            "searchable": 1,
+            "filterable": 1,
+            "switchable": 1
+        },
+        {
 			"api": "https://newtv.ggff.net/pingguo?token=dt7oO7x4",
 			"key": "嗷呜小苹果",
 			"name": "🦄小苹果｜追剧",
