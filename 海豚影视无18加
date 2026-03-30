@@ -4,17 +4,13 @@
     "wallpaper":"http://tool.teyonds.com/api",
     "warningText": "学习使用，资源来源于网络，请勿贩卖，请加载24小时后删除，出现其他问题与作者无关，请知悉！",
     "sites": [
-        {
-        "key":"爱奇艺弹幕",
-        "name":"🐬爱奇艺视频｜追剧 TG:@usfgrjk",
-        "jar":"https://gitee.com/yiwu369/6758/raw/master/jar/spider.jar",
-        "type":3,
-        "api":"https://gitee.com/yiwu369/6758/raw/master/JS/drpy2.min.js",
-         "searchable":1,
-         "quickSearch":0,
-         "changeable":1,
-         "ext":"https://gitee.com/yiwu369/6758/raw/master/JS/爱奇艺弹幕.js"
-         },
+       {
+            "key": "爱奇艺",
+            "name": "🐬爱奇艺｜追剧",
+            "type": 3,
+            "api": "https://wget.la/raw.githubusercontent.com/PizazzGY/NewTVBox/main/js/drpy2.min.js",
+            "ext": "https://wget.la/raw.githubusercontent.com/PizazzGY/NewTVBox/main/movie/js/AQY.js"
+        },
          {
          "key":"优酷弹幕",
          "name":"🐬优酷视频｜追剧",
