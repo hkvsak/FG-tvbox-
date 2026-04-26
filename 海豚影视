@@ -65,15 +65,7 @@
         "喜剧片"
       ]
       },
-      {
-            "key": "guazi",
-            "name": "🐬瓜子影视｜追剧",
-            "type": 3,
-            "api": "csp_Guazi",
-            "searchable": 1,
-            "changeable": 1,
-            "ext": {}
-        },
+  {"key":"瓜子影视","name":"瓜子影视","type":4,"api":"https://catbox.n13.club/ai/瓜子影视.php"},
         {    
             "key": "热播影视",
             "name": "🐬热播影视｜追剧",
