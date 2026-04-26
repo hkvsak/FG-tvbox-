@@ -65,14 +65,17 @@
         "喜剧片"
       ]
       },
-      {
-      "key": "WexGuaZi",
-      "name": "🐬瓜子影视｜追剧",
-      "type": 3,
-      "api": "csp_WexGuaZiGuard",
-      "searchable": 1,
-      "changeable": 1
-    },
+       {
+            "key": "GuaZi",
+            "name": "🐬瓜子影视｜追剧",
+            "type": 3,
+            "api": "csp_GuaZi",
+            "searchable": 1,
+            "changeable": 0,
+            "ext": {
+                "commonConfig": "./json/peizhi.json"
+            }
+        },
         {    
             "key": "热播影视",
             "name": "🐬热播影视｜追剧",
