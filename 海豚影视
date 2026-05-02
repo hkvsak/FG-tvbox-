@@ -813,12 +813,5 @@
             "ua": "okhttp",
             "url": "http://xtvantsc.xyz/欧美2160.m3u"
         } 
-],
-  "headers": [
-    {
-      "host": "hlsztemgsplive.miguvideo.com",
-      "header": {
-        "User-Agent": "bingcha/1.1 (mianfeifenxiang) "
-      }
    ]
 }
