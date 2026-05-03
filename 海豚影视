@@ -148,31 +148,6 @@
 			"type": 3,
 			"api": "https://xn--fjq53n.xyz/Ting/yinyue/网易云音乐1.py"
 		},
-        {
-             "key": "hipy_js_酷我听书[听]",
-             "name": "🐬酷我听书｜听书",
-              "type": 3,
-              "api": "https://gitee.com/abiubiud/xxs/raw/main/lib/drpy2.min.js",
-              "searchable": 1,
-              "quickSearch": 1,
-              "filterable": 1,
-              "ext": "https://gitee.com/abiubiud/xxs/raw/main/dr2/酷我听书[听].js"
-        },
-        {
-              "key": "hipy_js_爱上你听书",
-              "name": "🐬爱上听书｜听书",
-              "type": 3,
-              "api": "https://gitee.com/abiubiud/xxs/raw/main/lib/drpy2.min.js",
-              "searchable": 1,
-              "quickSearch": 1,
-              "ext": "https://gitee.com/abiubiud/xxs/raw/main/dr2/爱上你听书网[听].js"
-        },
-        {
-			"key": "py_动漫巴士",
-			"name": "🐬动漫巴士｜动漫",
-			"type": 4,
-			"api": "https://py.doube.eu.org/v2/spider?site=6b5899d243816bacb8712de7ab6ceb89"
-		},
          {
             "key": "黄色仓库|AV",
             "name": "🐬黄色仓库(旧)｜🔞",
