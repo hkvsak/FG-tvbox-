@@ -282,6 +282,25 @@
             "quickSearch": 1,
             "filterable": 1
         },
+        {
+      "key": "cj_360资源",
+      "name": "🐬360丨短剧",
+      "type": 1,
+      "searchable": 0,
+      "quickSearch": 1,
+      "filterable": 1,
+      "api": "https://360zy.com/api.php/provide/vod",
+      "categories": [
+        "爽文短剧",
+        "现代都市",
+        "脑洞悬疑",
+        "年代穿越",
+        "古装仙侠",
+        "反转爽剧",
+        "女频恋爱",
+        "成长逆袭"
+      ]
+    },
          {
 			"key": "网易云音乐",
 			"name": "🐬网易云｜音乐",
