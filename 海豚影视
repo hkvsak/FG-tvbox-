@@ -415,7 +415,7 @@
             }
         },  
        {
-			"name": "公益影视┃公益解析",
+			"name": "公益解析",
 			"type": "1",
 			"url": "https://rizzon.in/wp-content/json.php?url=",
 			"ext": {
@@ -443,43 +443,6 @@
 				}
 			}
 		},
-     {
-			"name": "公益影视┃无双",
-			"type": 1,
-			"url": "http://1.94.221.189:88/algorithm.php?url=",
-			"ext": {
-				"flag": [
-					"hgvip"
-				],
-				"header": {
-					"User-Agent": "okhttp/4.9.1"
-				}
-			}
-		},
-		{
-			"name": "公益影视┃咸鱼",
-			"type": 0,
-			"url": "https://jx.xymp4.cc/?url=",
-			"ext": {
-				"header": {
-					"user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36 Edg/134.0.3124.68"
-				}
-			}
-		},
-    {
-      "name": "海外看",
-      "hosts": [
-        "haiwaikan"
-      ],
-      "regex": [
-        "10.0099",
-        "10.3333",
-        "16.0599",
-        "8.1748",
-        "12.33",
-        "10.85"
-      ]
-    },
     {
       "name": "火山嗅探",
       "hosts": [
