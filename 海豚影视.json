@@ -30,6 +30,16 @@
         "ext":"https://cdn.waimaimingtang.com/file/images/bwc/20251023002108-a4795930ec.js"
         },
 		{
+			"key": "暴风",
+			"name": "🐬暴风影视",
+			"type": 1,
+			"api": "https://app.bfzyapi.com/api.php/provide/vod/",
+			"searchable": 1,
+			"filterable": 1,
+			"quickSearch": 1,
+			"categories": ["国产动漫", "日韩动漫", "欧美动漫", "海外动漫", "动画片", "国产剧", "韩国剧", "香港剧", "台湾剧", "欧美剧", "动作片", "科幻片", "喜剧片", "恐怖片", "战争片"]
+		},
+		{
       "key": "49zy",
       "name": "🐬49影视",
       "type": 1,
