@@ -323,6 +323,14 @@
       "api": "http://lbapiby.com/api.php/provide/vod/at/xml"
     },
     {
+      "key": "香蕉资源",
+      "name": "🐬香蕉资源",
+      "type": 0,
+      "api": "https://www.xiangjiaozyw.com/api.php/provide/vod/at/xml/",
+      "searchable": 1,
+      "quickSearch": 0
+    },
+		{
       "key": "大地采集",
       "name": "🐬大地av｜🔞",
       "type": 0,
