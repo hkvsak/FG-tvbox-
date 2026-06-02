@@ -315,6 +315,15 @@
 			"type": 3,
 			"api": "https://xn--fjq53n.xyz/Ting/yinyue/网易云音乐1.py"
 		},
+		{
+            "key": "X滴滴",
+            "name": "🐬滴滴｜🔞",
+            "type": 1,
+            "api": "https://api.ddapi.cc/api.php/provide/vod/",
+            "quickSearch": 1,
+            "searchable": 1,
+            "filterable": 0
+        },
 	{
       "key": "*AIvin",
       "name": "🐬AIvin｜🔞",
