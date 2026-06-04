@@ -336,15 +336,6 @@
         "成长逆袭"
       ]
     },
-		{
-      "key": "旺旺资源",
-      "name": "🐬旺旺短剧",
-      "type": 1,
-      "api": "https://api.wwzy.tv/api.php/provide/vod/?ac=list",
-      "playUrl": "",
-      "searchable": 1,
-      "quickSearch": 1
-    },
          {
 			"key": "网易云音乐",
 			"name": "🐬网易云｜音乐",
@@ -408,15 +399,6 @@
             "name": "🐬鸡坤｜🔞",
             "type": 1,
             "api": "https://jkunzyapi.com/api.php/provide/vod/",
-            "quickSearch": 1,
-            "searchable": 1,
-            "filterable": 0
-        },
-       {
-            "key": "X细胞",
-            "name": "🐬X细胞｜🔞",
-            "type": 1,
-            "api": "https://www.xxibaozyw.com/api.php/provide/vod/",
             "quickSearch": 1,
             "searchable": 1,
             "filterable": 0
