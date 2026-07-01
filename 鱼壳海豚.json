@@ -536,8 +536,7 @@
       "timeout": 60,
       "style": {
         "type": "rect",
-        "ratio": 1.48
-      },
+        "ratio": 1.48,
       "api": "csp_GM",
       "ext": {
         "userScript": "https://ghfast.top/https://raw.githubusercontent.com/FGBLH/GHK/refs/heads/main/jar_js/jable.user.js",
