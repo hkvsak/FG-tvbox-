@@ -78,6 +78,12 @@
 			"api": "https://ghfast.top/https://raw.githubusercontent.com/FGBLH/GHK/refs/heads/main/py/观风影视.py"
 		},
 		{
+			"key": "SZ",
+			"name": "🐬山楂影视.py(关梯)[追剧]",
+			"type": 3,
+			"api": "https://ghfast.top/https://raw.githubusercontent.com/FGBLH/GHK/refs/heads/main/py/山楂影视.py"
+		},
+		{
 			"key": "nmvm",
 			"name": "🐬农民影视.py[追剧]",
 			"type": 3,
