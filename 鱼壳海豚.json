@@ -132,6 +132,12 @@
 			"api": "https://ghfast.top/https://raw.githubusercontent.com/FGBLH/GHK/refs/heads/main/py/山楂影视.py"
 		},
 		{
+			"key": "qmvm",
+			"name": "🐬七猫影视.py",
+			"type": 3,
+			"api": "https://ghfast.top/https://raw.githubusercontent.com/FGBLH/GHK/refs/heads/main/py/七猫影视.py"
+		},
+		{
 			"key": "nmvm",
 			"name": "🐬农民影视.py[追剧]",
 			"type": 3,
