@@ -108,6 +108,12 @@
 			"api": "https://ghfast.top/https://raw.githubusercontent.com/FGBLH/HKL/refs/heads/main/py/优视频.py"
 		},
 		{
+          "key": "xhvm",
+          "name": "🐬骚火影视.py[追剧]",
+          "type": 3,
+          "api": "https://ghfast.top/https://raw.githubusercontent.com/FGBLH/HKL/refs/heads/main/py/骚火影视.py"
+        },
+		{
           "key": "ayf",
           "name": "🐬爱壹帆影视.py[追剧]",
           "type": 3,
