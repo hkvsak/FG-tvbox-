@@ -59,6 +59,12 @@
          "ext": "https://ghfast.top/https://raw.githubusercontent.com/IY-CPU/IY/main/lib/茫茫.png"
         },
 		{
+           "key": "MGtv",
+           "name": "🐬芒果TV.py",
+           "type": 3,
+           "api": "https://ghfast.top/https://raw.githubusercontent.com/FGBLH/HKL/refs/heads/main/py/芒果TV.py"
+       },
+		{
             "name": "弹幕",
             "key": "弹幕豆瓣",
             "type": 3,
@@ -81,12 +87,6 @@
 			"type": 3,
 			"api": "https://ghfast.top/https://raw.githubusercontent.com/FGBLH/HKL/refs/heads/main/py/油管.py"
 		},
-		{
-           "key": "MGtv",
-           "name": "🐬芒果TV.py",
-           "type": 3,
-           "api": "https://ghfast.top/https://raw.githubusercontent.com/FGBLH/HKL/refs/heads/main/py/芒果TV.py"
-       },
 		{
 			"key": "ddvm",
 			"name": "🐬低端影视.py",
