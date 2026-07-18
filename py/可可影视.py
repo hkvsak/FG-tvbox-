@@ -1,28 +1,45 @@
+#coding=utf-8
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# by @嗷呜
+"""
+TVBox / 影视仓  Python源脚本
+站点: 可可影视 (103.51.147.112:51120)
+"""
 
-import re
 import sys
-import uuid
-from base64 import b64decode, b64encode
-from concurrent.futures import ThreadPoolExecutor
-from pprint import pprint
-from Crypto.Cipher import AES
-from Crypto.Hash import HMAC, SHA1
-from Crypto.Util.Padding import unpad
+import re
+import json
+import requests
+from urllib.parse import quote
+from pyquery import PyQuery as pq
 sys.path.append('..')
 from base.spider import Spider
-import time
-import json
-
 
 class Spider(Spider):
+
+    def __init__(self):
+        super().__init__()
+        self.site = 'https://103.51.147.112:51120'
+        self.session = requests.Session()
+        self.session.headers.update({
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Referer': 'https://103.51.147.112:51120/'
+        })
+        self.cateManual = {
+            '电影': '1',
+            '连续剧': '2',
+            '动漫': '3',
+            '综艺纪录': '4',
+            '短剧': '6'
+        }
+        # 隐晦的站点标识
+        self._mark = chr(26143) + chr(27827)
 
     def init(self, extend=""):
         pass
 
     def getName(self):
-        pass
+        return "可可影视"
 
     def isVideoFormat(self, url):
         pass
@@ -30,241 +47,362 @@ class Spider(Spider):
     def manualVideoCheck(self):
         pass
 
-    def destroy(self):
-        pass
-
-    host = 'https://vlogic.mfxdf.cn'
-    phost='https://vres.kvod6.com'
-    # phost='https://vlogic.kvod10.com'
-
-    t = str(int(time.time()) * 1000)
-
     def homeContent(self, filter):
-        data = self.getdata('/v4/config/appInit.capi', {"appId": "kkdy", "os": "android", "userLevel": "0"})
-        result = {}
-        try:
-            modu = self.loadSpider("Wogg")
-            hosts=data['urls']['cache']
-            self.host = hosts[0] if len(hosts)==1 else modu.host_late(hosts)
-        except:
-            pass
-        vodTabs = data['vodTabs']
-        classes = []
-        for tab in vodTabs:
-            if tab.get("type") not in ["home", "netflix"]:
-                classes.append({
-                    "type_id": tab.get("name", ""),
-                    "type_name": tab.get("text", "")
-                })
-        filters = {}
-        channelListQuery = data['channelListQuery']
-        for channel in channelListQuery:
-            cid = str(channel.get("channelId"))
-            if cid not in [c["type_id"] for c in classes]:
-                continue
-
-            filter_array = []
-            for item in channel.get("items", []):
-                value_array = []
-                for data in item.get("data", []):
-                    value_array.append({
-                        "n": data.get("name", ""),
-                        "v": data.get("id", "")
-                    })
-
-                if value_array:
-                    filter_array.append({
-                        "key": item.get("query", ""),
-                        "name": value_array[0].get("n", ""),
-                        "value": value_array[1:]
-                    })
-
-            if filter_array:
-                filters[cid] = filter_array
-
-        result["class"] = classes
-        result["filters"] = filters
+        result = {'class': [], 'filters': {}, 'list': [], 'parse': 0, 'jx': 0}
+        for k, v in self.cateManual.items():
+            result['class'].append({
+                'type_id': str(v),
+                'type_name': k
+            })
         return result
 
     def homeVideoContent(self):
-        params = {"appId": "kkdy", "os": "android", "userLevel": "2"}
-        data = self.getdata('/v4/vod/home.capi', params)
-        vlist = []
-        for item in data['data']['blocks']:
-            if item.get('data', None) and isinstance(item['data'], list):
-                if 'vod/detail?vodId=' in item['data'][0].get('url', None):
-                    vlist=self.getlist(item['data'])
-        return {'list': vlist}
+        videos = []
+        try:
+            url = f'{self.site}/channel/1.html'
+            r = self.session.get(url, timeout=15, verify=False)
+            r.encoding = 'utf-8'
+            doc = pq(r.text)
+            items = doc('.module-item')
+            seen = set()
+            for item in items.items():
+                a = item.find('.v-item')
+                href = a.attr('href') or ''
+                vid = self.getVid(href)
+                if not vid or vid in seen:
+                    continue
+                seen.add(vid)
+
+                # 标题
+                titles = item.find('.v-item-title')
+                title = ''
+                for j in range(len(titles)):
+                    t = titles.eq(j).text().strip()
+                    if t and t != '可可影视-kekys.com':
+                        title = t
+                        break
+
+                # 图片
+                pic = ''
+                imgs = item.find('img')
+                for j in range(len(imgs)):
+                    img = imgs.eq(j)
+                    src = img.attr('data-original') or ''
+                    if src and 'placeholder' not in src and 'logo_placeholder' not in src:
+                        pic = src
+                        break
+                if pic and pic.startswith('/'):
+                    pic = 'https://vres.zyxpedu.com' + pic
+
+                # 备注
+                note = ''
+                bottom = item.find('.v-item-bottom span')
+                if bottom.length:
+                    note = bottom.text().strip()
+
+                if title:
+                    videos.append({
+                        'vod_id': vid,
+                        'vod_name': title,
+                        'vod_pic': pic,
+                        'vod_remarks': note
+                    })
+        except Exception as e:
+            print(f'homeVideoContent error: {e}')
+        return {'list': videos[:24], 'parse': 0, 'jx': 0}
 
     def categoryContent(self, tid, pg, filter, extend):
-        params = {"appId": "kkdy", "area": extend.get("area", ""), "category": extend.get("category", ""), "channelId": tid, "language": "", "next": f"{'' if pg == '1' else f'page={pg}'}", "os": "android", "sort": extend.get("sort", ""), "userLevel": "2", "year": extend.get("year", "")}
-        data = self.getdata('/vod/channel/list.capi', params)
-        result = {}
-        result['list'] = self.getlist(data['data']['items'])
-        result['page'] = pg
-        result['pagecount'] = 9999
-        result['limit'] = 90
-        result['total'] = 999999
+        result = {'list': [], 'parse': 0, 'jx': 0}
+        page = int(pg) if pg else 1
+        try:
+            url = f'{self.site}/channel/{tid}.html?page={page}'
+            r = self.session.get(url, timeout=15, verify=False)
+            r.encoding = 'utf-8'
+            doc = pq(r.text)
+            items = doc('.module-item')
+            for item in items.items():
+                a = item.find('.v-item')
+                href = a.attr('href') or ''
+                vid = self.getVid(href)
+                if not vid:
+                    continue
+
+                # 标题
+                titles = item.find('.v-item-title')
+                title = ''
+                for j in range(len(titles)):
+                    t = titles.eq(j).text().strip()
+                    if t and t != '可可影视-kekys.com':
+                        title = t
+                        break
+
+                # 图片
+                pic = ''
+                imgs = item.find('img')
+                for j in range(len(imgs)):
+                    img = imgs.eq(j)
+                    src = img.attr('data-original') or ''
+                    if src and 'placeholder' not in src and 'logo_placeholder' not in src:
+                        pic = src
+                        break
+                if pic and pic.startswith('/'):
+                    pic = 'https://vres.zyxpedu.com' + pic
+
+                # 备注
+                note = ''
+                bottom = item.find('.v-item-bottom span')
+                if bottom.length:
+                    note = bottom.text().strip()
+
+                if title:
+                    result['list'].append({
+                        'vod_id': vid,
+                        'vod_name': title,
+                        'vod_pic': pic,
+                        'vod_remarks': note
+                    })
+        except Exception as e:
+            print(f'categoryContent error: {e}')
+
+        result['page'] = page
+        result['pagecount'] = page + 1 if len(result['list']) > 0 else page
+        result['limit'] = len(result['list'])
+        result['total'] = len(result['list'])
         return result
 
     def detailContent(self, ids):
-        params = {"appId":"kkdy","os": "android","userLevel": "2","vodId":ids[0]}
-        data = self.getdata('/v2/vod/detail.capi', params)
-        data = data['data']
-        vod = {
-            'vod_name': data.get('title'),
-            'type_name': data.get('channelName'),
-            'vod_year': data.get('premiereDate'),
-            'vod_remarks': data.get('bottomLabel'),
-            'vod_content': data.get('summary')
-        }
-        pname=[]
-        purl=[]
-        tasks = []
-        for i in data['playSources']:
-            pname.append(i['name'])
-            if len(i['list'])>0:
-                purl.append(self.dlist(i['list']))
-            else:
-                tasks.append({"appId": "kkdy","episodeVodId": str(i['episodeVodId']),"os": "android","siteId": i['siteId'],"userLevel": "2","vodId": ids[0]})
-        if tasks:
-            with ThreadPoolExecutor(max_workers=len(tasks)) as executor:
-                results = executor.map(self.mflist, tasks)
-                for result in results:
-                    if result:
-                        purl.append(result)
+        result = {'list': [], 'parse': 0, 'jx': 0}
+        vid = ids[0] if ids else ''
+        if not vid:
+            return result
+        try:
+            url = f'{self.site}/detail/{vid}.html'
+            r = self.session.get(url, timeout=15, verify=False)
+            r.encoding = 'utf-8'
+            html = r.text
+
+            # 标题：从title标签提取，最可靠
+            title = ''
+            title_match = re.search(r'<title>(.+?)</title>', html)
+            if title_match:
+                title = title_match.group(1).split('-')[0].strip()
+                # 去掉特殊字符水印
+                title = re.sub(r'[𝕜𝕜𝕪𝕤𝟘𝟙𝕔𝕠𝕞.\s]+', ' ', title).strip()
+                title = re.sub(r'\s+', ' ', title).strip()
+
+            # 图片：从og:image提取
+            pic = ''
+            og_img = re.search(r'<meta\s+property="og:image"\s+content="([^"]+)"', html)
+            if og_img:
+                pic = og_img.group(1)
+                if pic.startswith('/'):
+                    pic = 'https://vres.zyxpedu.com' + pic
+
+            # 简介：从meta description提取
+            desc = ''
+            desc_match = re.search(r'<meta\s+name="description"\s+content="([^"]+)"', html)
+            if desc_match:
+                desc = desc_match.group(1).strip()
+
+            # 播放线路和集数
+            play_from = []
+            play_url = []
+            episodes_by_sid = {}
+            sids_in_order = []
+            seen_sids = set()
+
+            # 纯正则提取所有播放链接
+            all_play = re.findall(r'<a[^>]+href="(/play/\d+-(\d+)-(\d+)\.html)"[^>]+class="episode-item"[^>]*>(.*?)</a>', html, re.DOTALL)
+            # 如果没匹配到，试试class在href前面的情况
+            if not all_play:
+                all_play = re.findall(r'<a[^>]+class="episode-item"[^>]+href="(/play/\d+-(\d+)-(\d+)\.html)"[^>]*>(.*?)</a>', html, re.DOTALL)
+            for href, sid, nid, link_html in all_play:
+                text = re.sub(r'<[^>]+>', '', link_html).strip()
+                if not text:
+                    continue
+                if sid not in episodes_by_sid:
+                    episodes_by_sid[sid] = []
+                episodes_by_sid[sid].append(f'{text}${href}')
+                if sid not in seen_sids:
+                    seen_sids.add(sid)
+                    sids_in_order.append(sid)
+
+            # 线路名称
+            source_labels = []
+            all_labels = re.findall(r'class="source-item-label"[^>]*>([^<]+)</', html)
+            for label in all_labels:
+                label = label.strip()
+                if label:
+                    source_labels.append(label)
+
+            for i, sid in enumerate(sids_in_order):
+                if sid in episodes_by_sid and episodes_by_sid[sid]:
+                    if i < len(source_labels):
+                        line_name = source_labels[i]
                     else:
-                        purl.append("")
-        vod['vod_play_from']='$$$'.join(pname)
-        vod['vod_play_url']='$$$'.join(purl)
-        return {'list':[vod]}
+                        line_name = f'线路{sid}'
+                    # 跳过4K线路（只有APP端能用）
+                    if line_name == '4K':
+                        continue
+                    play_from.append(line_name)
+                    play_url.append('#'.join(episodes_by_sid[sid]))
 
-    def searchContent(self, key, quick, pg="1"):
-        params = {
-            "appId": "kkdy",
-              "channelId": "0",
-              "k": key,
-              "next": f"page={pg}",
-              "os": "android",
-              "userChannel": "c1",
-              "userLevel": "2"
+            vod = {
+                'vod_id': vid,
+                'vod_name': title,
+                'vod_pic': pic,
+                'type_name': '',
+                'vod_year': '',
+                'vod_area': '',
+                'vod_remarks': '',
+                'vod_actor': '',
+                'vod_director': self._mark,
+                'vod_content': desc,
+                'vod_play_from': '$$$'.join(play_from) if play_from else '',
+                'vod_play_url': '$$$'.join(play_url) if play_url else ''
             }
-        if pg == "1" or not pg:params['next'] =''
-        data = self.getdata('/vod/search/query', params)
-        vlist = self.getlist(data['data']['items'])
-        return {'list': vlist, 'page': pg}
-
-    def playerContent(self, flag, id, vipFlags):
-        return {'parse':0,'url':id,'header': {'User-Agent':'com.stub.StubApp/3.3.1 (Linux;Android 11) ExoPlayerLib/2.18.1'}}
-
-    def localProxy(self, param):
-        pass
-
-    def aes(self, encrypted_text):
-        key = "ayt5wy5afwmwrpb19k9s3psx3dymyd0n".encode('utf-8')
-        iv = "b3t069ijy7pirw0jayt5wy5afwmwrpb1".encode('utf-8')
-        encrypted_data = b64decode(encrypted_text)
-        cipher = AES.new(key, AES.MODE_CBC, iv[:16])
-        decrypted_data = cipher.decrypt(encrypted_data)
-        unpadded_data = unpad(decrypted_data, AES.block_size)
-        result = unpadded_data.decode('utf-8')
+            result['list'].append(vod)
+        except Exception as e:
+            print(f'detailContent error: {e}')
         return result
 
-    def getsign(self, path, query_params, device_info):
-        message = f"get|{path}|{query_params}|{self.t}|{device_info}|"
-        key = "ksggsr4tp6difdo1c3im8fqd3g"
-        message_bytes = message.encode('utf-8')
-        key_bytes = key.encode('utf-8')
-        h = HMAC.new(key_bytes, digestmod=SHA1)
-        h.update(message_bytes)
-        signature = h.hexdigest()
-        return signature
+    def playerContent(self, flag, id, vipFlags):
+        result = {}
+        try:
+            play_url = id
+            if id and not id.startswith('http'):
+                play_url = self.site + id
 
-    def getHeaders(self, path, query_params):
-        uid = str(uuid.uuid4())
-        deviceid = "730bd3c2d2941505"
-        devicecreatedat = "1735803745796"
-        userid = "17246016"
-        deviceinfo = {"brand": "Xiaomi", "model": "M2012K10C", "type": "phone", "resolutionX": "1080",
-                      "resolutionY": "2272", "orientation": "1", "osName": "android", "osVersion": "11",
-                      "osLevel": "30", "abi": "arm64-v8a,armeabi-v7a,armeabi", "androidId": deviceid, "uuid": uid,
-                      "gaid": ""}
-        hdeviceinfo = b64encode(json.dumps(deviceinfo).encode('utf-8')).decode('utf-8')
-        x_token = "MTcyNDYwMTZ8MTczNTc0NDg3OXxiNjcyM2Y0NmMzY2YwNGU1OGMwOGU5NzMyZTQyY2U4ODE1ZjM2M2FmZTRiOGZiYTI3YzU3N2M1NzI1NjQzNzc3"
-        headers = {
-            'User-Agent': 'com.sbskk.k17/3.3.1 Dalvik/2.1.0 (Linux; U; Android 11; M2012K10C Build/RP1A.200720.011)',
-            'x-cdn': '1',
-            'x-token': x_token,
-            'appid': 'kkdy',
-            'os': 'android',
-            'appversion': '3.3.1',
-            'package': 'com.sbskk.k17',
-            'deviceid': deviceid,
-            'devicecreatedat': devicecreatedat,
-            'userid': userid,
-            'deviceinfo': hdeviceinfo,
-            'channelid': 'c1',
-            'x-d-video': '1',
-            'st': '2',
-            'ts': self.t,
-            'sign': self.getsign(path, query_params,f'appId=kkdy&deviceCreatedAt={devicecreatedat}&deviceId={deviceid}&st=2&userId={userid}'),
-        }
-        return headers
+            r = self.session.get(play_url, timeout=15, verify=False)
+            r.encoding = 'utf-8'
 
-    def js(self, param):
-        return '&'.join(f"{k}={v}" for k, v in param.items())
+            video_url = ''
+            
+            patterns = [
+                r'src:\s*["\']([^"\']+\.(m3u8|mp4)[^"\']*)["\']',
+                r'"url"\s*:\s*"([^"]+\.(m3u8|mp4)[^"]*)"',
+                r"url\s*:\s*'([^']+\.(m3u8|mp4)[^']*)'",
+            ]
+            
+            for pat in patterns:
+                m = re.search(pat, r.text, re.DOTALL)
+                if m:
+                    video_url = m.group(1)
+                    break
+            
+            if not video_url:
+                all_urls = re.findall(r'https?://[^\s"\'<>]+\.(m3u8|mp4)[^\s"\'<>]*', r.text)
+                if all_urls:
+                    for url_match in all_urls:
+                        u = url_match[0] if isinstance(url_match, tuple) else url_match
+                        if 'index.m3u8' in u or 'video.m3u8' in u or '.mp4' in u:
+                            video_url = u
+                            break
+                    if not video_url:
+                        video_url = all_urls[0][0] if isinstance(all_urls[0], tuple) else all_urls[0]
 
-    def getdata(self, path, params):
-        query_params = self.js(params)
-        headers = self.getHeaders(path, query_params)
-        data = self.fetch(f'{self.host}{path}?{query_params}', headers=headers).content
-        tdata = self.aes(b64encode(data).decode('utf-8'))
-        return json.loads(tdata)
+            if video_url:
+                result['parse'] = 0
+                result['url'] = video_url
+                result['jx'] = 0
+                result['header'] = {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    'Referer': self.site + '/'
+                }
+            else:
+                result['parse'] = 1
+                result['url'] = play_url
+                result['jx'] = 0
+                result['header'] = {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    'Referer': self.site + '/'
+                }
+        except Exception as e:
+            print(f'playerContent error: {e}')
+            result['parse'] = 1
+            result['url'] = id if id.startswith('http') else self.site + id
+            result['jx'] = 0
+            result['header'] = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Referer': self.site + '/'
+            }
+        return result
 
-    def getlist(self,data):
-        vlist = []
-        ph = {
-            'User-Agent': 'okhttp/4.10.0',
-            'group': 'vod1',
-            'imageindex': '0',
-        }
-        ph='@'.join(f"{k}={v}" for k, v in ph.items())
-        for i in data:
-            img=self.phost+i.get('imagePath').replace('vod','vod1/vod')+'@'+ph
-            vlist.append({
-                'vod_id': i.get('id'),
-                'vod_name': re.sub(r'<[^>]+>', '', i.get('title')),
-                'vod_pic': img,
-                'vod_year': i.get('topLeftLabel'),
-                'vod_remarks': i.get('bottomLabel')}
-            )
-        return vlist
+    def searchContent(self, key, quick, pg='1'):
+        result = {'list': [], 'parse': 0, 'jx': 0}
+        page = int(pg) if pg else 1
+        try:
+            # 先访问搜索页获取token
+            search_url = f'{self.site}/search?k={quote(key)}'
+            r = self.session.get(search_url, timeout=15, verify=False)
+            r.encoding = 'utf-8'
+            t_match = re.search(r'name="t" value="([^"]+)"', r.text)
+            t = t_match.group(1) if t_match else ''
+            
+            if t:
+                url = f'{self.site}/search?k={quote(key)}&t={quote(t)}'
+                if page > 1:
+                    url += f'&page={page}'
+                r = self.session.get(url, timeout=15, verify=False)
+                r.encoding = 'utf-8'
 
-    def mflist(self, body):
-        data = self.getdata('/v2/vod/episodes.capi', body)
-        return self.dlist(data['data'])
+            doc = pq(r.text)
+            items = doc('.search-result-item')
+            for item in items.items():
+                href = item.attr('href') or ''
+                vid = self.getVid(href)
+                if not vid:
+                    continue
 
-    def dlist(self, data):
-        vlist = []
-        for j in data:
-            try:
-                # 尝试添加到列表
-                vlist.append(j['title'] + '$' + j['playUrls'][0]['url'])
-            except Exception as e:
-                # 如果有错误，打印 j 和错误信息
-                print(f"Error with item: {j}")
-                print(f"Error message: {e}")
-        return '#'.join(vlist)
+                # 标题
+                title = ''
+                title_elem = item.find('.title')
+                if title_elem.length:
+                    title = title_elem.text().strip()
+                if not title:
+                    img = item.find('img')
+                    if img.length:
+                        title = img.attr('alt') or img.attr('title') or ''
+                        title = title.strip()
 
+                # 图片
+                pic = ''
+                imgs = item.find('img')
+                for j in range(len(imgs)):
+                    img = imgs.eq(j)
+                    src = img.attr('data-original') or img.attr('src') or ''
+                    if src and 'placeholder' not in src and 'logo_placeholder' not in src:
+                        pic = src
+                        break
+                if pic and pic.startswith('/'):
+                    pic = 'https://vres.zyxpedu.com' + pic
 
-if __name__ == "__main__":
-    sp = Spider()
-    # formatJo = sp.init([])
-    # formatJo = sp.homeContent(False)  # 主页，等于真表示启用筛选
-    # formatJo = sp.homeVideoContent()  # 主页视频
-    # formatJo = sp.searchContent("斗罗",False,'2') # 搜索{"area":"大陆","by":"hits","class":"国产","lg":"国语"}
-    formatJo = sp.categoryContent('2', '1', False, {})  # 分类
-    # formatJo = sp.detailContent(['228147'])  # 详情
-    # formatJo = sp.playerContent("","https://www.yingmeng.net/vodplay/140148-2-1.html",{}) # 播放
-    # formatJo = sp.localProxy({"":"https://www.yingmeng.net/vodplay/140148-2-1.html"}) # 播放
-    pprint(formatJo)
+                if title:
+                    result['list'].append({
+                        'vod_id': vid,
+                        'vod_name': title,
+                        'vod_pic': pic,
+                        'vod_remarks': ''
+                    })
+        except Exception as e:
+            print(f'searchContent error: {e}')
+
+        result['page'] = page
+        result['pagecount'] = page + 1 if len(result['list']) > 0 else page
+        result['limit'] = len(result['list'])
+        result['total'] = len(result['list'])
+        return result
+
+    def localProxy(self, params):
+        return [200, "video/MP2T", {}, ""]
+
+    def getVid(self, url):
+        if not url:
+            return ''
+        m = re.search(r'/detail/(\d+)\.html', url)
+        if m:
+            return m.group(1)
+        m = re.search(r'/play/(\d+)-', url)
+        if m:
+            return m.group(1)
+        return ''
